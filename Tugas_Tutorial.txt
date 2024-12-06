@@ -1,0 +1,82 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns  # Untuk visualisasi confusion matrix
+
+# Dataset
+data = {
+    'weight': [150, 130, 180, 190, 170, 175, 165, 155],
+    'size': [7, 6, 9, 8, 8, 7, 6, 6],
+    'label': ['apple', 'apple', 'orange', 'orange', 'orange', 'orange', 'apple', 'apple']
+}
+
+df = pd.DataFrame(data)
+print("Dataframe:\n", df)
+
+# Visualisasi dataset
+plt.figure(figsize=(8, 6))
+for label, color in zip(['apple', 'orange'], ['red', 'orange']):
+    subset = df[df['label'] == label]
+    plt.scatter(subset['weight'], subset['size'], label=label, color=color)
+
+plt.xlabel('Weight')
+plt.ylabel('Size')
+plt.title('Scatter Plot of Fruits')
+plt.legend()
+plt.show()
+
+# Encode labels (apple = 0, orange = 1)
+df['label'] = df['label'].map({'apple': 0, 'orange': 1})
+
+# Fitur dan label
+X = df[['weight', 'size']].values
+y = df['label'].values
+
+# Split dataset menjadi training dan testing
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model KNN
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train, y_train)
+
+# Prediksi
+y_pred = knn.predict(X_test)
+print("Predictions:", y_pred)
+
+# Confusion Matrix
+conf_matrix = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:\n", conf_matrix)
+
+# Visualisasi Confusion Matrix
+plt.figure(figsize=(6, 5))
+sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=['Apple', 'Orange'], yticklabels=['Apple', 'Orange'])
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
+
+# Classification Report
+report = classification_report(y_test, y_pred, target_names=['Apple', 'Orange'])
+print("Classification Report:\n", report)
+
+# Contoh data baru
+new_data = np.array([[160, 7], [180, 8]])
+predictions = knn.predict(new_data)
+predicted_labels = ['apple' if pred == 0 else 'orange' for pred in predictions]
+print("Predictions for new data:", predicted_labels)
+
+# Visualisasi prediksi data baru
+plt.figure(figsize=(8, 6))
+for label, color in zip(['apple', 'orange'], ['red', 'orange']):
+    subset = df[df['label'] == label]
+    plt.scatter(subset['weight'], subset['size'], label=label, color=color)
+
+plt.scatter(new_data[:, 0], new_data[:, 1], color='blue', label='New Data', marker='x', s=100)
+plt.xlabel('Weight')
+plt.ylabel('Size')
+plt.title('Fruit Classification with New Data')
+plt.legend()
+plt.show()
